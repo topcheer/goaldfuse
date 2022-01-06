@@ -22,4 +22,12 @@ jobs:
       # You may pin to the exact commit or the version.
       # uses: goreleaser/goreleaser-action@5df302e5e9e4c66310a6b6493a8865b12c555af2
       uses: goreleaser/goreleaser-action@v2.8.0
-
+      with:
+        args: release --rm-dist
+      env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Upload assets
+      uses: actions/upload-artifact@v2
+      with:
+        name: goaldfuse
+        path: dist/*
