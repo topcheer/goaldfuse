@@ -465,7 +465,7 @@ func (h *AliYunDriveFs) ReadDir(ctx context.Context, op *fuseops.ReadDirOp) erro
 	if err != nil {
 		return err
 	}
-	dh.inode.errFuse("ReadDir", len(entries), "Offset:", op.Offset)
+	dh.inode.logFuse("ReadDir", len(entries), "Offset:", op.Offset)
 	if op.Offset >= fuseops.DirOffset(uint64(len(entries)-1)) {
 		op.BytesRead = 0
 		return nil
@@ -479,7 +479,7 @@ func (h *AliYunDriveFs) ReadDir(ctx context.Context, op *fuseops.ReadDirOp) erro
 			if n == 0 {
 				break
 			}
-			dh.inode.errFuse("Entry", "Written:", n)
+			dh.inode.logFuse("Entry", "Written:", n)
 			dh.inode.logFuse("<-- ReadDir", entry.Name, entry.Offset)
 			op.BytesRead += n
 
