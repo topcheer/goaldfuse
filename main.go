@@ -64,7 +64,10 @@ func main() {
 		mountPoint = "/tmp/" + uuid.New().String()
 	}
 
-	os.Mkdir(mountPoint, os.FileMode(777))
+	err := os.Mkdir(mountPoint, os.FileMode(0755))
+	if err != nil {
+		return
+	}
 	mfs, err := fuse.Mount(mountPoint, afs, mountConfig)
 	defer func(dir string) {
 		err := fuse.Unmount(dir)
