@@ -1,4 +1,4 @@
-FROM 1.17.6-alpine3.15 AS builder
+FROM golang:1.17.6-alpine3.15 AS builder
 RUN go env -w GO111MODULE=auto \
   && go env -w GOPROXY=https://goproxy.cn,direct  \
   && sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories && cat /etc/apk/repositories \
