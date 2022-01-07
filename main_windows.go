@@ -1,13 +1,16 @@
+//go:build windows
+// +build windows
+
 package main
 
 import (
-	"context"
 	"flag"
 	"fmt"
 	"github.com/google/uuid"
 	"goaldfuse/aliyun"
 	"goaldfuse/aliyun/cache"
 	"goaldfuse/aliyun/model"
+	"goaldfuse/fs_windows"
 	"goaldfuse/utils"
 	"io/ioutil"
 	"os"
@@ -58,48 +61,41 @@ func main() {
 		RefreshToken: rr.RefreshToken,
 		ExpireTime:   time.Now().Unix() + rr.ExpiresIn,
 	}
-	afs, _ := fs.NewAliYunDriveFsServer(*config)
+	afs := fs_windows.NewAliYunDriveFSHost(*config)
 	cache.Init()
-	mountConfig := &fuse.MountConfig{FSName: "AliYunDrive",
-		ReadOnly:           false,
-		VolumeName:         "AliYunDrive",
-		EnableVnodeCaching: false,
-		//ErrorLogger:        log.New(os.Stderr, "FuseError: ", log.LstdFlags),
-		//DebugLogger:        log.New(os.Stdout, "FuseDebug: ", log.LstdFlags),
-	}
+
 	utils.VerboseLog = true
 	mountPoint := *mp
 	if len(*mp) == 0 {
 		mountPoint = "/tmp/" + uuid.New().String()
 	}
-	if runtime.GOOS == "windows" {
+	if runtime.GOOS == "windows" && len(*mp) == 0 {
 		mountPoint = "c:\\tmp\\" + uuid.New().String()
 	}
-
-	err = os.Mkdir(mountPoint, os.FileMode(0755))
-	if err != nil {
-		fmt.Println("Failed to create mount point", mountPoint, err)
-		return
-	}
-	mfs, err := fuse.Mount(mountPoint, afs, mountConfig)
-	defer func(dir string) {
-		err := fuse.Unmount(dir)
+	if runtime.GOOS != "windows" {
+		err = os.Mkdir(mountPoint, os.FileMode(0755))
 		if err != nil {
+			fmt.Println("Failed to create mount point", mountPoint, err)
 			return
 		}
+	}
+
+	afs.Mount(mountPoint, nil)
+	defer func(dir string) {
+		afs.Unmount()
+
 	}(mountPoint)
 	if err != nil {
 		return
 	}
-	errs := mfs.Join(context.Background())
-	if err != nil {
-		fmt.Println(errs)
-	}
-	err = fuse.Unmount(mountPoint)
-	if err != nil {
+
+	succeed := afs.Unmount()
+	if !succeed {
 		fmt.Println("Failed to Unmount", mountPoint)
 	}
-	err = os.RemoveAll(mountPoint)
+	if runtime.GOOS != "windows" {
+		err = os.RemoveAll(mountPoint)
+	}
 	if err != nil {
 		return
 	}
