@@ -89,10 +89,6 @@ func main() {
 		return
 	}
 
-	succeed := afs.Unmount()
-	if !succeed {
-		fmt.Println("Failed to Unmount", mountPoint)
-	}
 	if runtime.GOOS != "windows" {
 		err = os.RemoveAll(mountPoint)
 	}
