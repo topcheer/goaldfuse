@@ -36,7 +36,8 @@ func main() {
 	if len(*refreshToken) == 0 {
 		rt, ok := ioutil.ReadFile(".refresh_token")
 		if ok != nil {
-			panic("Refresh token required,use touch .refresh_token;echo YOUR_REFRESH_TOKE > .refresh_token")
+			fmt.Println("Refresh token required,use touch .refresh_token;echo YOUR_REFRESH_TOKE > .refresh_token")
+			return
 		}
 		rtoken = string(rt)
 	} else {
@@ -45,7 +46,8 @@ func main() {
 
 	rr := aliyun.RefreshToken(rtoken)
 	if reflect.DeepEqual(rr, model.RefreshTokenModel{}) {
-		panic("can't get token")
+		fmt.Println("Invalid Refresh Token")
+		return
 	}
 	config := &model.Config{
 		DriveId:      rr.DefaultDriveId,
