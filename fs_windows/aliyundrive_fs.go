@@ -3,7 +3,9 @@ package fs_windows
 import (
 	"fmt"
 	"github.com/billziss-gh/cgofuse/fuse"
+	"github.com/jacobsa/syncutil"
 	"goaldfuse/aliyun"
+	. "goaldfuse/aliyun/common"
 	"goaldfuse/aliyun/model"
 	"strconv"
 )
@@ -18,12 +20,86 @@ func NewAliYunDriveFSHost(config model.Config) *fuse.FileSystemHost {
 type AliYunDriveFS struct {
 	fuse.FileSystemInterface
 	//Ali API Config
-	Config model.Config
-	Host   *fuse.FileSystemHost
+	Config       model.Config
+	Host         *fuse.FileSystemHost
+	mu           syncutil.InvariantMutex
+	nextInodeID  InodeID
+	inodes       map[InodeID]*Inode
+	rootAttrs    InodeAttributes
+	nextHandleID HandleID
+	dirHandles   map[HandleID]*DirHandle
+	fileHandles  map[HandleID]*FileHandle
+	flags        *FlagStorage
+	//replicators *Ticket
+	//restorers   *Ticket
+
+	forgotCnt uint32
+	pnCache   map[string]*Inode
 }
 
 var TOTAL uint64
 var USED uint64
+
+func (fs *AliYunDriveFS) allocateInodeId() (id InodeID) {
+	id = fs.nextInodeID
+	fs.nextInodeID++
+	return
+}
+
+// LOCKS_REQUIRED(fs.mu)
+// LOCKS_REQUIRED(parent.mu)
+func (fs *AliYunDriveFS) insertInode(parent *Inode, inode *Inode) {
+	addInode := false
+	if inode.Name == "." {
+		inode.Id = parent.Id
+	} else if inode.Name == ".." {
+		inode.Id = InodeID(RootInodeID)
+		if parent.Parent != nil {
+			inode.Id = parent.Parent.Id
+		}
+	} else {
+		if inode.Id != 0 {
+			panic(fmt.Sprintf("inode id is set: %v %v", inode.Name, inode.Id))
+		}
+		inode.Id = fs.allocateInodeId()
+		addInode = true
+	}
+	parent.insertChildUnlocked(inode)
+	if addInode {
+		fs.mu.Lock()
+		fs.inodes[inode.Id] = inode
+		fs.pnCache[parent.FileId+inode.Name+inode.Type] = inode
+		fs.mu.Unlock()
+		// if we are inserting a new directory, also create
+		// the child . and ..
+		if inode.isDir() {
+			fs.addDotAndDotDot(inode)
+		}
+	}
+}
+
+func (fs *AliYunDriveFS) addDotAndDotDot(dir *Inode) {
+	dot := NewInode(fs, dir, ".")
+	dot.ToDir()
+	dot.AttrTime = TIME_MAX
+	fs.insertInode(dir, dot)
+
+	dot = NewInode(fs, dir, "..")
+	dot.ToDir()
+	dot.AttrTime = TIME_MAX
+	fs.insertInode(dir, dot)
+}
+
+func (fs *AliYunDriveFS) getInodeOrDie(id InodeID) (inode *Inode) {
+	fs.mu.RLock()
+	inode = fs.inodes[id]
+	fs.mu.RUnlock()
+	if inode == nil {
+		panic(fmt.Sprintf("Unknown inode: %v", id))
+	}
+
+	return
+}
 
 // Init is called when the file system is created.
 func (fs *AliYunDriveFS) Init() {
