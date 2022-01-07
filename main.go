@@ -17,14 +17,21 @@ import (
 	"time"
 )
 
+var Version = "v1.0.8"
+
 func main() {
 	var refreshToken *string
 	var mp *string
+	var version *bool
 
 	refreshToken = flag.String("rt", "", "refresh_token")
 	mp = flag.String("mp", "", "mount_point，will create if not exist")
+	version = flag.Bool("v", false, "Print version and exit")
 	flag.Parse()
-
+	if *version {
+		fmt.Println(Version)
+		return
+	}
 	rtoken := *refreshToken
 	if len(*refreshToken) == 0 {
 		rt, ok := ioutil.ReadFile(".refresh_token")

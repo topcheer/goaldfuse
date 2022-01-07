@@ -20,6 +20,7 @@ builds:
      - 5
      - 6
      - 7
+     - 8
    ignore:
      - goos: darwin
        goarch: 386
@@ -28,6 +29,9 @@ builds:
      - goos: openbsd
        goarch: arm
        goarm: 6
+     - goos: netbsd
+       goarch: arm
+       goarm: 7
 archives:
   - name_template: "{{.Os}}-{{.Arch}}{{if .Arm}}v{{.Arm}}{{end}}-{{ .ProjectName }}"
     format: tar.gz
@@ -45,3 +49,5 @@ archives:
       openbsd: OpenBSD
       netbsd: NetBSD
       freebsd: FreeBSD
+universal_binaries:
+  - replace: true
