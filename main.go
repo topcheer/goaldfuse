@@ -14,6 +14,7 @@ import (
 	"io/ioutil"
 	"os"
 	"reflect"
+	"runtime"
 	"time"
 )
 
@@ -49,6 +50,10 @@ func main() {
 		fmt.Println("Invalid Refresh Token")
 		return
 	}
+	err := ioutil.WriteFile(".refresh_token", []byte(rr.RefreshToken), 0600)
+	if err != nil {
+		fmt.Println("Can't write token file, token will not be able to persist")
+	}
 	config := &model.Config{
 		DriveId:      rr.DefaultDriveId,
 		Token:        rr.AccessToken,
@@ -69,9 +74,13 @@ func main() {
 	if len(*mp) == 0 {
 		mountPoint = "/tmp/" + uuid.New().String()
 	}
+	if runtime.GOOS == "windows" {
+		mountPoint = "c:\\tmp\\" + uuid.New().String()
+	}
 
-	err := os.Mkdir(mountPoint, os.FileMode(0755))
+	err = os.Mkdir(mountPoint, os.FileMode(0755))
 	if err != nil {
+		fmt.Println("Failed to create mount point", mountPoint, err)
 		return
 	}
 	mfs, err := fuse.Mount(mountPoint, afs, mountConfig)

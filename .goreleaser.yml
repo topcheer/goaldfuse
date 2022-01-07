@@ -31,6 +31,9 @@ builds:
      - goos: netbsd
        goarch: arm
        goarm: 6
+     - goos: netbsd
+       goarch: arm
+       goarm: 7
 archives:
   - name_template: "{{.Os}}-{{.Arch}}{{if .Arm}}v{{.Arm}}{{end}}-{{ .ProjectName }}"
     format: tar.gz

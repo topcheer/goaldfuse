@@ -10,6 +10,7 @@ import (
 	"goaldfuse/aliyun"
 	. "goaldfuse/aliyun/common"
 	"goaldfuse/aliyun/model"
+	"io/ioutil"
 	"os/user"
 	"reflect"
 	"strconv"
@@ -71,6 +72,10 @@ func NewAliYunDriveFsServer(config model.Config) (fuse.Server, error) {
 					RefreshToken: refreshResult.RefreshToken,
 					Token:        refreshResult.AccessToken,
 					ExpireTime:   time.Now().Unix() + refreshResult.ExpiresIn,
+				}
+				err := ioutil.WriteFile(".refresh_token", []byte(refreshResult.RefreshToken), 0600)
+				if err != nil {
+					fmt.Println("Can't write token file, token will not be able to persist")
 				}
 			}
 		}
