@@ -17,7 +17,7 @@ import (
 	"time"
 )
 
-var Version = "v1.0.8"
+var Version = "v1.0.9"
 
 func main() {
 	var refreshToken *string
