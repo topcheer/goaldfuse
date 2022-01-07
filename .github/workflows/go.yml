@@ -64,3 +64,8 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN  }}
 
+    - name: Upload assets
+      uses: actions/upload-artifact@v2
+      with:
+        name: goaldfuse
+        path: dist/*
