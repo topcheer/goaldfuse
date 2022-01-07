@@ -8,7 +8,6 @@ builds:
      - linux
      - windows
      - darwin
-     - freebsd
    goarch:
      - amd64
      - 386
@@ -21,8 +20,6 @@ builds:
    ignore:
      - goos: darwin
        goarch: 386
-     - goos: freebsd
-       goarch: arm
 
 archives:
   - name_template: "{{.Os}}-{{.Arch}}{{if .Arm}}v{{.Arm}}{{end}}-{{ .ProjectName }}"
@@ -38,6 +35,5 @@ archives:
       darwin: macOS
       linux: Linux
       windows: Windows
-      freebsd: FreeBSD
 universal_binaries:
   - replace: true
