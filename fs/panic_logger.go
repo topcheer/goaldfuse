@@ -12,10 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package common
+package fs
 
 import (
 	"context"
+	"goaldfuse/common"
 	"runtime/debug"
 
 	"github.com/jacobsa/fuse"
@@ -29,7 +30,7 @@ type FusePanicLogger struct {
 
 func LogPanic(err *error) {
 	if e := recover(); e != nil {
-		log.Errorf("stacktrace from panic: %v \n"+string(debug.Stack()), e)
+		common.Log.Errorf("stacktrace from panic: %v \n"+string(debug.Stack()), e)
 		if *err == nil {
 			*err = fuse.EIO
 		}

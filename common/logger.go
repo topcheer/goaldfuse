@@ -27,7 +27,7 @@ import (
 var mu sync.Mutex
 var loggers = make(map[string]*LogHandle)
 
-var log = GetLogger("main")
+var Log = GetLogger("main")
 var cloudLogLevel = logrus.InfoLevel
 
 func SetCloudLogLevel(level logrus.Level) {

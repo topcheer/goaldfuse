@@ -11,13 +11,12 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-//go:build !windows
-// +build !windows
 
 package fs
 
 import (
 	"errors"
+	. "goaldfuse/common"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -35,13 +34,13 @@ func getCgroupAvailableMem() (retVal uint64, err error) {
 
 	data, err := ioutil.ReadFile(CGROUP_PATH)
 	if err != nil {
-		log.Debugf("Unable to read file %s error: %s", CGROUP_PATH, err)
+		Log.Debugf("Unable to read file %s error: %s", CGROUP_PATH, err)
 		return 0, err
 	}
 
 	path, err := getMemoryCgroupPath(string(data))
 	if err != nil {
-		log.Debugf("Unable to get memory cgroup path")
+		Log.Debugf("Unable to get memory cgroup path")
 		return 0, err
 	}
 
@@ -53,17 +52,17 @@ func getCgroupAvailableMem() (retVal uint64, err error) {
 		path = filepath.Join(CGROUP_FOLDER_PREFIX)
 	}
 
-	log.Debugf("the memory cgroup path for the current process is %v", path)
+	Log.Debugf("the memory cgroup path for the current process is %v", path)
 
 	mem_limit, err := readFileAndGetValue(filepath.Join(path, MEM_LIMIT_FILE_SUFFIX))
 	if err != nil {
-		log.Debugf("Unable to get memory limit from cgroup error: %v", err)
+		Log.Debugf("Unable to get memory limit from cgroup error: %v", err)
 		return 0, err
 	}
 
 	mem_usage, err := readFileAndGetValue(filepath.Join(path, MEM_USAGE_FILE_SUFFIX))
 	if err != nil {
-		log.Debugf("Unable to get memory usage from cgroup error: %v", err)
+		Log.Debugf("Unable to get memory usage from cgroup error: %v", err)
 		return 0, err
 	}
 
@@ -104,7 +103,7 @@ func getMemoryCgroupPath(data string) (string, error) {
 func readFileAndGetValue(path string) (uint64, error) {
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
-		log.Debugf("Unable to read file %v error: %v", path, err)
+		Log.Debugf("Unable to read file %v error: %v", path, err)
 		return 0, err
 	}
 

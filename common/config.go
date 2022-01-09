@@ -53,7 +53,7 @@ func (flags *FlagStorage) Cleanup() {
 	if flags.MountPointCreated != "" && flags.MountPointCreated != flags.MountPointArg {
 		err := os.Remove(flags.MountPointCreated)
 		if err != nil {
-			log.Errorf("rmdir %v = %v", flags.MountPointCreated, err)
+			Log.Errorf("rmdir %v = %v", flags.MountPointCreated, err)
 		}
 	}
 }

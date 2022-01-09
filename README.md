@@ -11,3 +11,5 @@ Mount Aliyun Drive as FUSE Drive
 
 
 [![GitHub license](https://badgen.net/github/license/topcheer/goaldfuse)](https://github.com/topcheer/goaldfuse/blob/master/LICENSE)
+
+Some code from [go-aliyundrive-webdav](https://github.com/LinkLeong/go-aliyundrive-webdav)

@@ -17,7 +17,7 @@
 package fs
 
 import (
-	. "goaldfuse/aliyun/common"
+	. "goaldfuse/common"
 
 	"io"
 	"runtime"
