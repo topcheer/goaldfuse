@@ -7,12 +7,14 @@ import (
 	"flag"
 	"fmt"
 	"github.com/google/uuid"
+	"github.com/medivh-jay/daemon"
 	"goaldfuse/aliyun"
 	"goaldfuse/aliyun/cache"
 	"goaldfuse/aliyun/model"
 	"goaldfuse/fs_windows"
 	"goaldfuse/utils"
 	"io/ioutil"
+	"log"
 	"os"
 	"reflect"
 	"runtime"
@@ -21,13 +23,39 @@ import (
 
 var Version = "v1.0.11"
 
-func main() {
+type FsHost struct {
+	//host *fuse.FileSystemHost
+}
+
+func (f FsHost) PidSavePath() string {
+	return "./"
+}
+
+func (f FsHost) Name() string {
+	return "goaldfuse"
+}
+
+func (f FsHost) Start() {
+	MountMe()
+
+}
+
+func (f FsHost) Stop() error {
+	return nil
+}
+
+func (f FsHost) Restart() error {
+	return nil
+}
+
+func MountMe() {
+	//func main() {
 	var refreshToken *string
 	var mp *string
 	var version *bool
 
 	refreshToken = flag.String("rt", "", "refresh_token")
-	mp = flag.String("mp", "", "mount_point，will create if not exist")
+	mp = flag.String("mp", "G:", "mount_point，use any available drive")
 	version = flag.Bool("v", false, "Print version and exit")
 	flag.Parse()
 	if *version {
@@ -61,8 +89,10 @@ func main() {
 		RefreshToken: rr.RefreshToken,
 		ExpireTime:   time.Now().Unix() + rr.ExpiresIn,
 	}
-	afs := fs_windows.NewAliYunDriveFSHost(*config)
+	utils.AccessToken = rr.AccessToken
+	utils.DriveId = rr.DefaultDriveId
 	cache.Init()
+	afs := fs_windows.NewAliYunDriveFSHost(*config)
 
 	utils.VerboseLog = true
 	mountPoint := *mp
@@ -70,17 +100,13 @@ func main() {
 		mountPoint = "/tmp/" + uuid.New().String()
 	}
 	if runtime.GOOS == "windows" && len(*mp) == 0 {
-		mountPoint = "c:\\tmp\\" + uuid.New().String()
+		mountPoint = "G:"
 	}
-	if runtime.GOOS != "windows" {
-		err = os.Mkdir(mountPoint, os.FileMode(0755))
-		if err != nil {
-			fmt.Println("Failed to create mount point", mountPoint, err)
-			return
-		}
-	}
+	options := []string{"-o", "volname=阿里云盘", "-o", "uid=0", "-o", "gid=0"}
+	afs.SetCapReaddirPlus(true)
+	afs.SetCapCaseInsensitive(true)
 
-	afs.Mount(mountPoint, nil)
+	afs.Mount(mountPoint, options)
 	defer func(dir string) {
 		afs.Unmount()
 
@@ -95,4 +121,24 @@ func main() {
 	if err != nil {
 		return
 	}
+}
+
+func main() {
+	out, _ := os.OpenFile("./goaldfuse.log", os.O_APPEND|os.O_CREATE|os.O_RDWR, 0644)
+	err, _ := os.OpenFile("./goaldfuse_err.log", os.O_APPEND|os.O_CREATE|os.O_RDWR, 0644)
+
+	// Use daemon.NewProcess to make your worker have signal monitoring, restart listening, and turn off listening, SetPipeline it's not necessary.
+	proc := daemon.NewProcess(new(FsHost)).SetPipeline(nil, out, err)
+
+	// This line is an example of creating a multi-level command
+	daemon.GetCommand().AddWorker(proc).AddWorker(proc)
+
+	// This line is an example of registering the main service directly
+	daemon.Register(proc)
+
+	// Start
+	if rs := daemon.Run(); rs != nil {
+		log.Fatalln(rs)
+	}
+
 }

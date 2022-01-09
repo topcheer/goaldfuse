@@ -67,12 +67,7 @@ func ContentHandle(intermediateFile *os.File, token string, driveId string, pare
 			utils.Verbose(utils.VerboseLog, err)
 		}
 	}(intermediateFile)
-	defer func(name string) {
-		err := os.Remove(name)
-		if err != nil {
-			utils.Verbose(utils.VerboseLog, err, name)
-		}
-	}(intermediateFile.Name())
+
 	//大于15K小于25G的才开启闪传
 	if size > 1024*15 && size <= 1024*1024*1024*25 {
 		preHashDataBytes := make([]byte, 1024)
