@@ -26,7 +26,7 @@ Window
 * Default Mount to G: , so please make it available before mounting
 * Tested with Winfsp on Windows 10/11 amd64, install before using this utility
 * https://github.com/billziss-gh/winfsp/releases/tag/v1.10
-
+* Latest Windows version https://github.com/topcheer/goaldfuse/releases/download/windows_latest/goladfuse-windows-x64.exe
 
 [![GitHub license](https://badgen.net/github/license/topcheer/goaldfuse)](https://github.com/topcheer/goaldfuse/blob/master/LICENSE)
 
