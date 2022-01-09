@@ -10,12 +10,8 @@ builds:
      - windows
    goarch:
      - amd64
-     - 386
-     - arm
      - arm64
    goarm:
-     - 5
-     - 6
      - 7
    ignore:
      - goos: darwin
@@ -29,8 +25,6 @@ archives:
         format: zip
     replacements:
       amd64: 64-bit
-      386: 32-bit
-      arm: ARM
       arm64: ARM64
       darwin: macOS
       linux: Linux

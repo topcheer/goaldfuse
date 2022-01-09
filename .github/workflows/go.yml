@@ -68,8 +68,6 @@ jobs:
         args: release --rm-dist
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN  }}
-    - run: CC=arm-linux-gnueabihf-gcc GOOS=darwin GOARCH=arm64 GOARM=7 CGO_ENABLED=1 go build -o goaldfuse-macos-arm64
-    - run: CC=aarch64-linux-gnu-gcc GOOS=darwin GOARCH=amd64 CGO_ENABLED=1 go build -o goaldfuse-macos-arm64
     - run: GOOS=windows GPARCH=amd64 CGO_ENABLED=1 CPATH=../winfsp-1.10/inc/fuse/ CFLAGS="-I ../winfsp-1.10/inc/fuse/" go  build -o goladfuse-windows-x64.exe
     - run: GOOS=windows GPARCH=arm64 CGO_ENABLED=1 CPATH=../winfsp-1.10/inc/fuse/ CFLAGS="-I ../winfsp-1.10/inc/fuse/" go  build -o goladfuse-windows-arm64.exe
 
