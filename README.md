@@ -13,6 +13,7 @@ Linux & MacOS
 `./goaldfuse -mp MountPoint -rt REFRESH_TOKEN`
 
 * Default Mount Point /tmp/RT
+* Only tested with MacFUSE on MacOS, other FUSE implementation should also work
 
 Window
 
@@ -23,9 +24,13 @@ Window
 `goalidfuse start`
 
 * Default Mount to G: , so please make it available before mounting
-
+* Tested with Winfsp on Windows 10/11 amd64, install before using this utility
+* https://github.com/billziss-gh/winfsp/releases/tag/v1.10
 
 
 [![GitHub license](https://badgen.net/github/license/topcheer/goaldfuse)](https://github.com/topcheer/goaldfuse/blob/master/LICENSE)
 
-Some code from [go-aliyundrive-webdav](https://github.com/LinkLeong/go-aliyundrive-webdav)
+Credits:
+* Some code from [go-aliyundrive-webdav](https://github.com/LinkLeong/go-aliyundrive-webdav)
+* Windows GO FUSE @billziss-gh/cgofuse
+* Linux/MacOS GO FUSE @jacobsa/fuse
