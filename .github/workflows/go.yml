@@ -69,8 +69,16 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN  }}
     - run: env CC="x86_64-w64-mingw32-gcc" GOOS=windows GPARCH=amd64 CGO_ENABLED=1 CPATH=/home/runner/work/goaldfuse/winfsp-1.10/inc/fuse/ CFLAGS="-I /home/runner/work/goaldfuse/winfsp-1.10/inc/fuse/" go  build -o goladfuse-windows-x64.exe
     - run: cp goladfuse-windows-x64.exe dist/goladfuse-windows-x64.exe
-    - name: Upload assets
-      uses: actions/upload-artifact@v2
+    - name: Create Release With Asset
+      id: Release-AIO
+      uses: Hs1r1us/Release-AIO@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        name: goaldfuse
-        path: dist/*
+        tag_name: ${{ github.ref }}
+        asset_files: './dist'
+#    - name: Upload assets
+#      uses: actions/upload-artifact@v2
+#      with:
+#        name: goaldfuse
+#        path: dist/*
