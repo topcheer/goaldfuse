@@ -59,7 +59,7 @@ jobs:
     - run: tar  xzvf ../winfsp.tar.gz -C ../
     - run: export CPATH=../winfsp-1.10/inc/fuse/
     - run: rm -f v1.10.tar.gz
-    - run: sudo apt-get install mingw-w64 -y
+    - run: sudo apt-get install mingw-w64 mingw-w64-tools -y
     - name: Run GoReleaser
       uses: goreleaser/goreleaser-action@v2
       with:
@@ -67,8 +67,8 @@ jobs:
         args: release --rm-dist
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN  }}
-    - run: env CC="x86_64-w64-mingw32-gcc" GOOS=windows GPARCH=amd64 CGO_ENABLED=1 CPATH=../winfsp-1.10/inc/fuse/ CFLAGS="-I ../winfsp-1.10/inc/fuse/" go  build -o goladfuse-windows-x64.exe
-
+    - run: env CC="x86_64-w64-mingw32-gcc" GOOS=windows GPARCH=amd64 CGO_ENABLED=1 CPATH=/home/runner/work/goaldfuse/winfsp-1.10/inc/fuse/ CFLAGS="-I /home/runner/work/goaldfuse/winfsp-1.10/inc/fuse/" go  build -o goladfuse-windows-x64.exe
+    - run: cp goladfuse-windows-x64.exe dist/goladfuse-windows-x64.exe
     - name: Upload assets
       uses: actions/upload-artifact@v2
       with:
