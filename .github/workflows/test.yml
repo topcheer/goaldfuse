@@ -1,4 +1,4 @@
-name: Go
+name: test
 
 on:
   push:
@@ -16,7 +16,9 @@ jobs:
       run: pwd
     - run: ls -al
     - run: hostname
-    - run: sudo apt update -y 
-    - run: sudo apt upgrade -y
+    - run: sudo apt install wget -y
+    - run: wget https://github.com/billziss-gh/winfsp/archive/refs/tags/v1.10.tar.gz
+    - run: tar xzvf v1.10.tar.gz
+    - run: ls -al
       
 
