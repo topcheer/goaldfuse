@@ -59,6 +59,8 @@ jobs:
     - run: tar  xzvf ../winfsp.tar.gz -C ../
     - run: export CPATH=../winfsp-1.10/inc/fuse/
     - run: rm -f v1.10.tar.gz
+    - run: sudo apt-get install gcc-arm-linux-gnueabihf -y
+    - run: sudo apt-get install gcc-aarch64-linux-gnu -y
     - name: Run GoReleaser
       uses: goreleaser/goreleaser-action@v2
       with:
