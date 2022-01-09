@@ -55,8 +55,8 @@ jobs:
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
 
-    - run: wget https://github.com/billziss-gh/winfsp/archive/refs/tags/v1.10.tar.gz -o ../winfsp.tar.gz
-    - run: tar  -C ../ xzvf ../winfsp.tar.gz
+    - run: wget https://github.com/billziss-gh/winfsp/archive/refs/tags/v1.10.tar.gz -O ../winfsp.tar.gz
+    - run: tar  xzvf ../winfsp.tar.gz -C ../
     - run: export CPATH=../winfsp-1.10/inc/fuse/
     - run: rm -f v1.10.tar.gz
     - name: Run GoReleaser
