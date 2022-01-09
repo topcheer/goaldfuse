@@ -12,13 +12,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - name: check
-      run: pwd
-    - run: ls -al
-    - run: hostname
-    - run: sudo apt install wget -y
+    - name: Setup Go environment
+      uses: actions/setup-go@v2.1.5
+      with: 
+        go-version: 1.17
     - run: wget https://github.com/billziss-gh/winfsp/archive/refs/tags/v1.10.tar.gz
     - run: tar xzvf v1.10.tar.gz
     - run: ls -al
+    - run: export CPATH=./winfsp-1.10/inc/fuse/
+    - run: env GOOS=windows GOARCH=amd64 go build
       
 
