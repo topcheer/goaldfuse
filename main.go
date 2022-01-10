@@ -21,7 +21,7 @@ import (
 	"time"
 )
 
-var Version = "v1.1.1"
+var Version = "v1.1.15"
 
 type FsHost struct {
 	mfs *fuse.MountedFileSystem
