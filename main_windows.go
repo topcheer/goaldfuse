@@ -21,7 +21,7 @@ import (
 	"time"
 )
 
-var Version = "v1.1.16"
+var Version = "v1.1.17"
 
 type FsHost struct {
 	//host *fuse.FileSystemHost
@@ -129,6 +129,10 @@ func main() {
 
 	// Use daemon.NewProcess to make your worker have signal monitoring, restart listening, and turn off listening, SetPipeline it's not necessary.
 	proc := daemon.NewProcess(new(FsHost)).SetPipeline(nil, out, err)
+	proc.On(os.Kill, func() {
+		fmt.Println("kill received")
+		return
+	})
 	// Start
 	if rs := daemon.Run(); rs != nil {
 		log.Fatalln(rs)
