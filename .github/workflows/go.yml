@@ -75,8 +75,8 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: windows_latest
-        asset_files: './dist'
+        tag_name: Windows_latest
+        asset_files: './dist/goladfuse-windows-x64.exe'
 #    - name: Upload assets
 #      uses: actions/upload-artifact@v2
 #      with:
