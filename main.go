@@ -23,7 +23,52 @@ import (
 
 var Version = "v1.1.1"
 
+type FsHost struct {
+	mfs *fuse.MountedFileSystem
+}
+
+func (f FsHost) PidSavePath() string {
+	return "./"
+}
+
+func (f FsHost) Name() string {
+	return "goaldfuse"
+}
+
+func (f FsHost) Start() {
+	go func() {
+		err := f.mfs.Join(context.Background())
+		if err != nil {
+			fmt.Println("unable to go into background")
+		}
+	}()
+
+}
+
+func (f FsHost) Stop() error {
+	err := fuse.Unmount(f.mfs.Dir())
+	if err != nil {
+		fmt.Println("unable to umount,", f.mfs.Dir())
+		return err
+	}
+	err = os.RemoveAll(f.mfs.Dir())
+	if err != nil {
+		fmt.Println("unable to remove", f.mfs.Dir())
+	}
+	return err
+}
+
+func (f FsHost) Restart() error {
+	err := f.Stop()
+	if err != nil {
+		return err
+	}
+	f.Start()
+	return nil
+}
+
 func main() {
+	//func MountMe() *fuse.MountedFileSystem {
 	var refreshToken *string
 	var mp *string
 	var version *bool
@@ -81,7 +126,7 @@ func main() {
 		mountPoint = "c:\\tmp\\" + uuid.New().String()
 	}
 
-	err = os.Mkdir(mountPoint, os.FileMode(0755))
+	err = os.Mkdir(mountPoint, 0777)
 	if err != nil {
 		fmt.Println("Failed to create mount point", mountPoint, err)
 		return
@@ -96,16 +141,48 @@ func main() {
 	if err != nil {
 		return
 	}
-	errs := mfs.Join(context.Background())
+	err = mfs.Join(context.Background())
 	if err != nil {
-		fmt.Println(errs)
+		fmt.Println("unable to go into background")
 	}
-	err = fuse.Unmount(mountPoint)
+	err = fuse.Unmount(mfs.Dir())
 	if err != nil {
-		fmt.Println("Failed to Unmount", mountPoint)
-	}
-	err = os.RemoveAll(mountPoint)
-	if err != nil {
+		fmt.Println("unable to umount,", mfs.Dir())
 		return
 	}
+	err = os.RemoveAll(mfs.Dir())
+	if err != nil {
+		fmt.Println("unable to remove", mfs.Dir())
+	}
+	//return mfs
+	//err = fuse.Unmount(mountPoint)
+	//if err != nil {
+	//	fmt.Println("Failed to Unmount", mountPoint)
+	//}
+
 }
+
+//func main() {
+//	out, _ := os.OpenFile("./goaldfuse.log", os.O_APPEND|os.O_CREATE|os.O_RDWR, 0644)
+//	err, _ := os.OpenFile("./goaldfuse_err.log", os.O_APPEND|os.O_CREATE|os.O_RDWR, 0644)
+//
+//	// Use daemon.NewProcess to make your worker have signal monitoring, restart listening, and turn off listening, SetPipeline it's not necessary.
+//	host := new(FsHost)
+//	host.mfs = MountMe()
+//	proc := daemon.NewProcess(host).SetPipeline(nil, out, err)
+//	proc.On(os.Kill, func() {
+//		err := fuse.Unmount(host.mfs.Dir())
+//		if err != nil {
+//			fmt.Println("failed to umount", host.mfs.Dir())
+//		}
+//		err = os.RemoveAll(host.mfs.Dir())
+//		if err != nil {
+//			fmt.Println("unable to remove", host.mfs.Dir())
+//		}
+//	})
+//	// Start
+//	if rs := daemon.Run(); rs != nil {
+//		log.Fatalln(rs)
+//	}
+//
+//}

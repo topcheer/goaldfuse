@@ -129,13 +129,6 @@ func main() {
 
 	// Use daemon.NewProcess to make your worker have signal monitoring, restart listening, and turn off listening, SetPipeline it's not necessary.
 	proc := daemon.NewProcess(new(FsHost)).SetPipeline(nil, out, err)
-
-	// This line is an example of creating a multi-level command
-	daemon.GetCommand().AddWorker(proc).AddWorker(proc)
-
-	// This line is an example of registering the main service directly
-	daemon.Register(proc)
-
 	// Start
 	if rs := daemon.Run(); rs != nil {
 		log.Fatalln(rs)
