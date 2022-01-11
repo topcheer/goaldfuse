@@ -10,14 +10,14 @@ require (
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/shirou/gopsutil v3.21.11+incompatible
 	github.com/sirupsen/logrus v1.8.1
+	github.com/spf13/cobra v0.0.5
 	github.com/tidwall/gjson v1.12.1
+	github.com/topcheer/daemon v1.0.6
 )
 
 require (
 	github.com/go-ole/go-ole v1.2.6 // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
-	github.com/medivh-jay/daemon v1.0.5 // indirect
-	github.com/spf13/cobra v0.0.5 // indirect
 	github.com/spf13/pflag v1.0.3 // indirect
 	github.com/stretchr/testify v1.7.0 // indirect
 	github.com/tidwall/match v1.1.1 // indirect

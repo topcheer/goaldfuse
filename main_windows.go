@@ -4,10 +4,9 @@
 package main
 
 import (
-	"flag"
 	"fmt"
-	"github.com/google/uuid"
-	"github.com/medivh-jay/daemon"
+	"github.com/spf13/cobra"
+	"github.com/topcheer/daemon"
 	"goaldfuse/aliyun"
 	"goaldfuse/aliyun/cache"
 	"goaldfuse/aliyun/model"
@@ -25,6 +24,7 @@ var Version = "v1.1.18"
 
 type FsHost struct {
 	//host *fuse.FileSystemHost
+	command *cobra.Command
 }
 
 func (f FsHost) PidSavePath() string {
@@ -32,11 +32,28 @@ func (f FsHost) PidSavePath() string {
 }
 
 func (f FsHost) Name() string {
-	return "goaldfuse"
+	vn, _ := f.command.PersistentFlags().GetString("volume-name")
+	return "goaldfuse" + vn
 }
 
 func (f FsHost) Start() {
-	MountMe()
+	var rt string
+	var mp string
+	var vm string
+	var err error
+	rt, err = f.command.PersistentFlags().GetString("refresh-token")
+	if err != nil {
+		rt = ""
+	}
+	mp, err = f.command.PersistentFlags().GetString("mount-point")
+	if err != nil {
+		mp = "G:"
+	}
+	vm, err = f.command.PersistentFlags().GetString("volume-name")
+	if err != nil {
+		vm = "阿里云盘"
+	}
+	MountMe(rt, mp, vm)
 
 }
 
@@ -48,33 +65,19 @@ func (f FsHost) Restart() error {
 	return nil
 }
 
-func MountMe() {
+func MountMe(rt string, mp string, volname string) {
 	//func main() {
-	var refreshToken *string
-	var mp *string
-	var version *bool
 
-	refreshToken = flag.String("rt", "", "refresh_token")
-	mp = flag.String("mp", "G:", "mount_point，use any available drive")
-	version = flag.Bool("v", false, "Print version and exit")
-	flag.Parse()
-	if *version {
-		fmt.Println(Version)
-		return
-	}
-	rtoken := *refreshToken
-	if len(*refreshToken) == 0 {
-		rt, ok := ioutil.ReadFile(".refresh_token")
+	if len(rt) == 0 {
+		rt1, ok := ioutil.ReadFile(".refresh_token")
 		if ok != nil {
 			fmt.Println("Refresh token required,use touch .refresh_token;echo YOUR_REFRESH_TOKE > .refresh_token")
 			return
 		}
-		rtoken = string(rt)
-	} else {
-		rtoken = *refreshToken
+		rt = string(rt1)
 	}
 
-	rr := aliyun.RefreshToken(rtoken)
+	rr := aliyun.RefreshToken(rt)
 	if reflect.DeepEqual(rr, model.RefreshTokenModel{}) {
 		fmt.Println("Invalid Refresh Token")
 		return
@@ -95,28 +98,24 @@ func MountMe() {
 	afs := fs_windows.NewAliYunDriveFSHost(*config)
 
 	utils.VerboseLog = true
-	mountPoint := *mp
-	if len(*mp) == 0 {
-		mountPoint = "/tmp/" + uuid.New().String()
+	if runtime.GOOS == "windows" && len(mp) == 0 {
+		mp = "G:"
 	}
-	if runtime.GOOS == "windows" && len(*mp) == 0 {
-		mountPoint = "G:"
-	}
-	options := []string{"-o", "volname=阿里云盘", "-o", "uid=0", "-o", "gid=0"}
+	options := []string{"-o", "volname=" + volname, "-o", "uid=0", "-o", "gid=0"}
 	afs.SetCapReaddirPlus(true)
 	afs.SetCapCaseInsensitive(true)
 
-	afs.Mount(mountPoint, options)
+	afs.Mount(mp, options)
 	defer func(dir string) {
 		afs.Unmount()
 
-	}(mountPoint)
+	}(mp)
 	if err != nil {
 		return
 	}
 
 	if runtime.GOOS != "windows" {
-		err = os.RemoveAll(mountPoint)
+		err = os.RemoveAll(mp)
 	}
 	if err != nil {
 		return
@@ -124,11 +123,28 @@ func MountMe() {
 }
 
 func main() {
-	out, _ := os.OpenFile("./goaldfuse.log", os.O_APPEND|os.O_CREATE|os.O_RDWR, 0644)
-	err, _ := os.OpenFile("./goaldfuse_err.log", os.O_APPEND|os.O_CREATE|os.O_RDWR, 0644)
 
-	// Use daemon.NewProcess to make your worker have signal monitoring, restart listening, and turn off listening, SetPipeline it's not necessary.
-	proc := daemon.NewProcess(new(FsHost)).SetPipeline(nil, out, err)
+	var refreshToken string
+	var _mp string
+	var volname string
+	//var version *bool
+	command := daemon.GetCommand()
+	command.TraverseChildren = true
+	//command.Flags().BoolVarP(version, "version", "v", true, "Print version and exit")
+	command.PersistentFlags().StringVarP(&refreshToken, "refresh-token", "r", "", "refresh_token")
+	command.PersistentFlags().StringVarP(&_mp, "mount-point", "m", "G:", "mount-point，use any available drive")
+	command.PersistentFlags().StringVarP(&volname, "volume-name", "v", "阿里云盘", "volume-name，default to 阿里云盘")
+
+	host := &FsHost{command: command}
+	errp := command.ParseFlags(os.Args)
+	if errp != nil {
+		return
+	}
+	vn, _ := command.PersistentFlags().GetString("volume-name")
+	out, _ := os.OpenFile("./goaldfuse"+vn+".log", os.O_APPEND|os.O_CREATE|os.O_RDWR, 0644)
+	err, _ := os.OpenFile("./goaldfuse_err"+vn+".log", os.O_APPEND|os.O_CREATE|os.O_RDWR, 0644)
+
+	proc := daemon.NewProcess(host).SetPipeline(nil, out, err)
 	proc.On(os.Kill, func() {
 		fmt.Println("kill received")
 		return
