@@ -7,6 +7,7 @@ require (
 	github.com/google/uuid v1.3.0
 	github.com/jacobsa/fuse v0.0.0-20211125163655-ffd6c474e806
 	github.com/jacobsa/syncutil v0.0.0-20180201203307-228ac8e5a6c3
+	github.com/orcaman/concurrent-map v1.0.0
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/shirou/gopsutil v3.21.11+incompatible
 	github.com/sirupsen/logrus v1.8.1

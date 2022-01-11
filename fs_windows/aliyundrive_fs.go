@@ -3,6 +3,7 @@ package fs_windows
 import (
 	"fmt"
 	"github.com/billziss-gh/cgofuse/fuse"
+	cmap "github.com/orcaman/concurrent-map"
 	"goaldfuse/aliyun"
 	"goaldfuse/aliyun/model"
 	. "goaldfuse/common"
@@ -27,8 +28,8 @@ func NewAliYunDriveFSHost(config model.Config) *fuse.FileSystemHost {
 	fmt.Println(config)
 	list, _ := aliyun.GetList(config.Token, config.DriveId, "")
 	fs.root = newNode(0, fs.ino, fuse.S_IFDIR|00777, 0, 0, "root", "")
-	fs.inodes = make(map[string]model.ListModel, 0)
-	fs.inodes["/"] = model.ListModel{Name: "Default", Type: "folder", FileId: "root", ParentFileId: ""}
+	fs.inodes = cmap.New()
+	fs.inodes.Set("/", model.ListModel{Name: "Default", Type: "folder", FileId: "root", ParentFileId: ""})
 	for _, item := range list.Items {
 		if item.Type == "folder" {
 			fs.makeNode("/"+item.Name, fuse.S_IFDIR|0777, 0, 4096, item.FileId, "root")
@@ -138,11 +139,13 @@ func (fs *AliYunDriveFS) lookupNode(path string, ancestor *node_t) (prnt *node_t
 	name = ""
 	node = fs.root
 	if path != "/" {
-		if !reflect.DeepEqual(fs.inodes[path], model.ListModel{}) {
-			if fs.inodes[path].Type == "folder" {
-				list, _ := aliyun.GetList(fs.Config.Token, fs.Config.DriveId, fs.inodes[path].FileId)
+		if fs.inodes.Has(path) {
+			l, _ := fs.inodes.Get(path)
+			r := l.(model.ListModel)
+			if r.Type == "folder" {
+				list, _ := aliyun.GetList(fs.Config.Token, fs.Config.DriveId, r.FileId)
 				for _, item := range list.Items {
-					if reflect.DeepEqual(fs.inodes[path+"/"+item.Name], model.ListModel{}) {
+					if !fs.inodes.Has(path + "/" + item.Name) {
 						if item.Type == "folder" {
 							fs.makeNode(path+"/"+item.Name, fuse.S_IFDIR|0777, 0, 4096, item.FileId, item.ParentFileId)
 						} else {
@@ -193,17 +196,17 @@ func (self *AliYunDriveFS) makeNode(path string, mode uint32, dev uint64, size i
 	if fileId != "" && parentFileId != "" {
 		fi := aliyun.GetFileDetail(self.Config.Token, self.Config.DriveId, fileId)
 		self.lock.Lock()
-		self.inodes[path] = fi
+		self.inodes.Set(path, fi)
 		self.lock.Unlock()
 		return 0, node, prnt
 	}
-	if reflect.DeepEqual(self.inodes[path], model.ListModel{}) && mode == fuse.S_IFDIR|0777 {
+	if !self.inodes.Has(path) && mode == fuse.S_IFDIR|0777 {
 		dir := aliyun.MakeDir(self.Config.Token, self.Config.DriveId, name, prnt.fileId)
 		node.fileId = dir.FileId
 		node.parentFileId = dir.ParentFileId
 		fi := aliyun.GetFileDetail(self.Config.Token, self.Config.DriveId, dir.FileId)
 		self.lock.Lock()
-		self.inodes[path] = fi
+		self.inodes.Set(path, fi)
 		self.lock.Unlock()
 		return 0, node, prnt
 	}
@@ -235,7 +238,7 @@ func (self *AliYunDriveFS) removeNode(path string, dir bool) int {
 	delete(prnt.chld, name)
 	self.lock.Lock()
 	defer self.lock.Unlock()
-	delete(self.inodes, path)
+	self.inodes.Remove(path)
 	aliyun.RemoveTrash(self.Config.Token, self.Config.DriveId, node.fileId, node.parentFileId)
 	tmsp := fuse.Now()
 	node.stat.Ctim = tmsp
@@ -297,7 +300,7 @@ type AliYunDriveFS struct {
 	lock    sync.RWMutex
 	root    *node_t
 	ino     uint64
-	inodes  map[string]model.ListModel
+	inodes  cmap.ConcurrentMap
 	pnCache map[string]*node_t
 	openmap map[uint64]*node_t
 }
