@@ -30,7 +30,6 @@ Window
 * Default Mount to G: , so please make it available before mounting
 * Tested with Winfsp on Windows 10/11 amd64, install before using this utility
 * https://github.com/billziss-gh/winfsp/releases/tag/v1.10
-* Latest Windows version https://github.com/topcheer/goaldfuse/releases/download/Windows_latest/goladfuse-windows-x64.exe
 * 特别说明： Windows对于图片，视频，PDF，Office文档等等会预读取65K～256K不等的文件头 ，如果你在移动流量下使用，一定要注意自己的流量
 * 建议只在Wifi环境中使用
 
