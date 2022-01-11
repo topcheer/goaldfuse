@@ -23,7 +23,7 @@ Window
 
 `touch .refresh_token`
 
-`echo YOUR_REFRESH_TOKEN .refresh_token>`
+`echo YOUR_REFRESH_TOKEN > .refresh_token`
 
 `goalidfuse start`
 
