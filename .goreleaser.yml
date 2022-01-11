@@ -7,6 +7,8 @@ builds:
    goos:
      - linux
      - darwin
+     - netbsd
+     - freebsd
    goarch:
      - amd64
      - arm64
@@ -15,7 +17,7 @@ builds:
    ignore:
      - goos: darwin
        goarch: 386
-   id: linux_macos
+   id: 1
  - env:
      - CGO_ENABLED=1
      - CC=x86_64-w64-mingw32-gcc
@@ -25,7 +27,7 @@ builds:
      - windows
    goarch:
      - amd64
-   id: windows
+   id: 2
 
 archives:
   - name_template: "{{.Os}}-{{.Arch}}{{if .Arm}}v{{.Arm}}{{end}}-{{ .ProjectName }}"
