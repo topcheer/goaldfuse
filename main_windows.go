@@ -20,7 +20,7 @@ import (
 	"time"
 )
 
-var Version = "v1.1.19"
+var Version = "v1.1.20"
 
 type FsHost struct {
 	//host *fuse.FileSystemHost
