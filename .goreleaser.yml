@@ -7,7 +7,6 @@ builds:
    goos:
      - linux
      - darwin
-     - windows
    goarch:
      - amd64
      - arm64
@@ -16,6 +15,15 @@ builds:
    ignore:
      - goos: darwin
        goarch: 386
+ - env:
+     - CGO_ENABLED=1
+     - CC=x86_64-w64-mingw32-gcc
+     - CPATH=/home/runner/work/goaldfuse/winfsp-1.10/inc/fuse/
+     - CFLAGS="-I /home/runner/work/goaldfuse/winfsp-1.10/inc/fuse/"
+   goos:
+     - windows
+   goarch:
+     - amd64
 
 archives:
   - name_template: "{{.Os}}-{{.Arch}}{{if .Arm}}v{{.Arm}}{{end}}-{{ .ProjectName }}"

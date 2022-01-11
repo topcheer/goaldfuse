@@ -55,10 +55,12 @@ jobs:
 #        tags: ${{ steps.meta.outputs.tags }}
 #        labels: ${{ steps.meta.outputs.labels }}
 
-    - run: wget https://github.com/billziss-gh/winfsp/archive/refs/tags/v1.10.tar.gz -O ../winfsp.tar.gz
-    - run: tar  xzvf ../winfsp.tar.gz -C ../
-    - run: export CPATH=../winfsp-1.10/inc/fuse/
-    - run: rm -f v1.10.tar.gz
+    - name: Download winfsp
+      run: wget https://github.com/billziss-gh/winfsp/archive/refs/tags/v1.10.tar.gz -O ../winfsp.tar.gz
+    - name: Unzip winfsp
+      run: tar  xzvf ../winfsp.tar.gz -C ../
+#    - run: export CPATH=../winfsp-1.10/inc/fuse/
+#    - run: rm -f v1.10.tar.gz
     - run: sudo apt-get install mingw-w64 mingw-w64-tools -y
     - name: Run GoReleaser
       uses: goreleaser/goreleaser-action@v2
@@ -67,16 +69,16 @@ jobs:
         args: release --rm-dist
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN  }}
-    - run: env CC="x86_64-w64-mingw32-gcc" GOOS=windows GPARCH=amd64 CGO_ENABLED=1 CPATH=/home/runner/work/goaldfuse/winfsp-1.10/inc/fuse/ CFLAGS="-I /home/runner/work/goaldfuse/winfsp-1.10/inc/fuse/" go  build -o goladfuse-windows-x64.exe
-    - run: cp goladfuse-windows-x64.exe dist/goladfuse-windows-x64.exe
-    - name: Create Release With Asset
-      id: Release-AIO
-      uses: Hs1r1us/Release-AIO@v1.0
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: Windows_${{ github.ref }}
-        asset_files: './dist/goladfuse-windows-x64.exe'
+#    - run: env CC="x86_64-w64-mingw32-gcc" GOOS=windows GPARCH=amd64 CGO_ENABLED=1 CPATH=/home/runner/work/goaldfuse/winfsp-1.10/inc/fuse/ CFLAGS="-I /home/runner/work/goaldfuse/winfsp-1.10/inc/fuse/" go  build -o goladfuse-windows-x64.exe
+#    - run: cp goladfuse-windows-x64.exe dist/goladfuse-windows-x64.exe
+#    - name: Create Release With Asset
+#      id: Release-AIO
+#      uses: Hs1r1us/Release-AIO@v1.0
+#      env:
+#        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#      with:
+#        tag_name: Windows_${{ github.ref }}
+#        asset_files: './dist/goladfuse-windows-x64.exe'
 #    - name: Upload assets
 #      uses: actions/upload-artifact@v2
 #      with:
