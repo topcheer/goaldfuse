@@ -7,18 +7,11 @@ builds:
    goos:
      - linux
      - darwin
-     - netbsd
-     - freebsd
    goarch:
      - amd64
      - arm64
    goarm:
      - 7
-   ignore:
-     - goos: darwin
-       goarch: 386
-     - goos: freebsd
-       goarch: arm64
    id: 1
  - env:
      - CGO_ENABLED=1
