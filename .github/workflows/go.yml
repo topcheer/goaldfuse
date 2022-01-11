@@ -61,7 +61,8 @@ jobs:
       run: tar  xzvf ../winfsp.tar.gz -C ../
 #    - run: export CPATH=../winfsp-1.10/inc/fuse/
 #    - run: rm -f v1.10.tar.gz
-    - run: sudo apt-get install mingw-w64 mingw-w64-tools -y
+    - name: Install MinGW
+      run: sudo apt-get install mingw-w64 mingw-w64-tools -y
     - name: Run GoReleaser
       uses: goreleaser/goreleaser-action@v2
       with:
