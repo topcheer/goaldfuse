@@ -21,7 +21,7 @@ import (
 	"time"
 )
 
-var Version = "v1.1.17"
+var Version = "v1.1.18"
 
 type FsHost struct {
 	//host *fuse.FileSystemHost
@@ -133,6 +133,8 @@ func main() {
 		fmt.Println("kill received")
 		return
 	})
+	daemon.Register(proc)
+
 	// Start
 	if rs := daemon.Run(); rs != nil {
 		log.Fatalln(rs)
